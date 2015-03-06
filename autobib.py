@@ -18,7 +18,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301,  USA.
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import re
 import hashlib
 import random
@@ -28,9 +28,9 @@ import subprocess
 import optparse
 import logging
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
-google_id = hashlib.md5(str(random.random())).hexdigest()[:16]
+google_id = hashlib.md5(str(random.random()).encode("utf-8")).hexdigest()[:16]
 GOOGLE_SCHOLAR_URL = "http://scholar.google.com"
 HEADERS = {'User-Agent' : 'Mozilla/5.0',
            'Cookie' : 'GSP=ID=%s:CF=4' % google_id }
@@ -49,10 +49,10 @@ def get_pdf_bibtex(pdf):
 
 def search(search_str):
     logging.debug("Search: %s" % search_str)
-    search_str = '/scholar?q=' + urllib2.quote(search_str)
+    search_str = '/scholar?q=' + urllib.parse.quote(search_str)
     url = GOOGLE_SCHOLAR_URL + search_str
-    request = urllib2.Request(url, headers=HEADERS)
-    response = urllib2.urlopen(request)
+    request = urllib.request.Request(url, headers=HEADERS)
+    response = urllib.request.urlopen(request)
     html = response.read()
     html.decode('ascii', 'ignore')
     soup = BeautifulSoup(html)
@@ -62,8 +62,8 @@ def search(search_str):
     elif soup.find('a', href=re.compile(".scholar\?hl.")) != None:
         url = str(soup.find('a', href=re.compile(".scholar\?hl."))['href'])
         url = GOOGLE_SCHOLAR_URL+url
-        request = urllib2.Request(url, headers=HEADERS)
-        response = urllib2.urlopen(request)
+        request = urllib.request.Request(url, headers=HEADERS)
+        response = urllib.request.urlopen(request)
         html = response.read()
         soup = BeautifulSoup(html)
         bib = get_bib(soup)
@@ -74,8 +74,8 @@ def get_bib(soup):
     if len(link) != 0:
         url = link[0]["href"]
         url = GOOGLE_SCHOLAR_URL+url
-        request = urllib2.Request(url, headers=HEADERS)
-        response = urllib2.urlopen(request)
+        request = urllib.request.Request(url, headers=HEADERS)
+        response = urllib.request.urlopen(request)
         bib = response.read().decode('ascii', 'ignore')
         return bib
 
@@ -91,10 +91,10 @@ def create_bibtex(args):
             else:
                 file.write('@comment{ERROR: Could not find bibtex for: %s}\n\n'
                            %  (filename))
-                print('ERROR: Could not find bibtex for: %s\n\n' %
-                      filename)
+                print(('ERROR: Could not find bibtex for: %s\n\n' %
+                      filename))
     file.close()
-    print('Bibliography written to %s' % args + '/' + BIB_FILE)
+    print(('Bibliography written to %s' % args + '/' + BIB_FILE))
 
 def pdf_to_txt(pdf):
     stdout = subprocess.Popen(["pdftotext", "-q", pdf, "-"],
