@@ -99,7 +99,7 @@ def create_bibtex(args):
 def pdf_to_txt(pdf):
     stdout = subprocess.Popen(["pdftotext", "-q", pdf, "-"],
                               stdout=subprocess.PIPE).communicate()[0]
-    return stdout
+    return stdout.decode("utf-8")
 
 if __name__ == "__main__":
     usage = "Usage: %prog [options] {path to pdf's}"
